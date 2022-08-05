@@ -1,21 +1,74 @@
-import React from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import "./ProgressArea.scss";
+import music1 from "../../music/music-1.mp3"
+import { useDispatch } from "react-redux";
+import { playMusic, stopyMusic } from "../../store/musicPlayerReducer";
+
 function ProgressArea(props, ref) {
 
+  const audio = useRef();
+  const dispatch = useDispatch();
+  const progressBar = useRef();
+
+  const [currentTime , setcurrentTime] = useState("00:00");
+  const [duration, setduration] = useState("00:00");
+
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      audio.current.play()
+    },
+    pause:() => {
+      audio.current.pause()
+    }
+  }))
+
+  const onPlay = () => {
+    dispatch(playMusic())
+  }
+
+  const onPause = () => {
+    dispatch(stopyMusic())
+  }
+
+  const getTime = (time) => {
+    const minute = `0${parseInt(time/60,10)}`
+    const seconds = `0${parseInt(time%60)}`
+    return `${minute} : ${seconds.slice(-2)}`
+  }
+
+  const ontimeUpdate = (e) => {
+    //0 이면 음악재생 준비 x 
+    if(e.target.readState === 0) { return;}
+    // 현재 시간
+    const currentTime = e.target.currentTime;
+    //전체 음악의 시간 초단위
+    const duration = e.target.duration;
+    //재생 시간
+    const progressBarWidth = (currentTime/duration) * 100; 
+    progressBar.current.style.width = `${progressBarWidth}%`
+    setcurrentTime(getTime(currentTime));
+    setduration(getTime(duration));
+  }
 
   return (
     <div className="progress-area">
-      <div className="progress-bar">
+      <div className="progress-bar" ref={progressBar}>
         <audio
           autoPlay
+          ref={audio}
+          src={music1}
+          onPlay ={onPlay}
+          onPause={onPause}
+          onTimeUpdate = {ontimeUpdate}
         ></audio>
       </div>
       <div className="music-timer">
-        <span>00:00</span>
-        <span>00:00</span>
+        <span>{currentTime}</span>
+        <span>{duration}</span>
       </div>
     </div>
   );
 }
 
-export default ProgressArea;
+export default forwardRef(ProgressArea);
