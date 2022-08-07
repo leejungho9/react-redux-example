@@ -1,15 +1,14 @@
 import React from "react";
 import RepeatIcon from "@mui/icons-material/Repeat";
-import RepeatOneIcon from "@mui/icons-material/RepeatOne";
 import PauseIcon from "@mui/icons-material/Pause";
 import SkipPrevious from "@mui/icons-material/SkipPrevious";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import SkipNext from "@mui/icons-material/SkipNext";
 import QueueMusic from "@mui/icons-material/QueueMusic";
-import ShuffleIcon from "@mui/icons-material/Shuffle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import "./Controls.scss";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import { nextMusic, prevMusic } from "../../store/musicPlayerReducer";
 
 
 const Controls = ({
@@ -18,11 +17,11 @@ const Controls = ({
   resetDuration,
   play,
   pause,
-  setVolume,
+  changeVolume,
 }) => {
 
   const playing = useSelector((state) => state.playing);
-
+  const dispatch = useDispatch();
   const onClickPlay = () => {
     play();
   }
@@ -30,6 +29,17 @@ const Controls = ({
   const onClickPause = () => {
     pause();
   }
+
+  const onChangeVolume =  (e) => {
+    changeVolume(e.target.value)
+  }
+  const onClickPrevios = () => {
+    dispatch(prevMusic())
+  }
+  const onClickNext = () => {
+    dispatch(nextMusic())
+  }
+
 
   return (
     <div className="control-area">
@@ -40,7 +50,7 @@ const Controls = ({
       <RepeatIcon sx={{ fontSize: 30, cursor: "pointer" }} />
       <SkipPrevious
         sx={{ fontSize: 30, cursor: "pointer" }}
-
+        onClick={onClickPrevios}
       />
       {playing ? (
         <PauseIcon
@@ -56,6 +66,7 @@ const Controls = ({
       )}
       <SkipNext
         sx={{ fontSize: 30, cursor: "pointer" }}
+        onClick={onClickNext}
 
       />
       <div className="volume-container">
@@ -64,6 +75,7 @@ const Controls = ({
           type="range"
           style={{ cursor: "pointer" }}
           defaultValue={1}
+          onChange={onChangeVolume}
           min="0"
           max="1"
           step="0.1"

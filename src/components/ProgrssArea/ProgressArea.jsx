@@ -1,13 +1,13 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import "./ProgressArea.scss";
-import music1 from "../../music/music-1.mp3"
-import { useDispatch } from "react-redux";
-import { playMusic, stopyMusic } from "../../store/musicPlayerReducer";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { nextMusic, playMusic, stopyMusic } from "../../store/musicPlayerReducer";
 
 function ProgressArea(props, ref) {
 
   const audio = useRef();
   const dispatch = useDispatch();
+  const {playList,currentIndex } = useSelector(state=>({playList:state.playList, currentIndex:state.currentIndex}),shallowEqual);
   const progressBar = useRef();
 
   const [currentTime , setcurrentTime] = useState("00:00");
@@ -20,6 +20,9 @@ function ProgressArea(props, ref) {
     },
     pause:() => {
       audio.current.pause()
+    },
+    changeVolume:(volume) => {
+      audio.current.volume = volume
     }
   }))
 
@@ -31,6 +34,10 @@ function ProgressArea(props, ref) {
     dispatch(stopyMusic())
   }
 
+  const onEnded = () => {
+    dispatch(nextMusic())  
+  }
+
   const getTime = (time) => {
     const minute = `0${parseInt(time/60,10)}`
     const seconds = `0${parseInt(time%60)}`
@@ -40,10 +47,13 @@ function ProgressArea(props, ref) {
   const ontimeUpdate = (e) => {
     //0 이면 음악재생 준비 x 
     if(e.target.readState === 0) { return;}
+
     // 현재 시간
     const currentTime = e.target.currentTime;
+
     //전체 음악의 시간 초단위
     const duration = e.target.duration;
+
     //재생 시간
     const progressBarWidth = (currentTime/duration) * 100; 
     progressBar.current.style.width = `${progressBarWidth}%`
@@ -51,13 +61,25 @@ function ProgressArea(props, ref) {
     setduration(getTime(duration));
   }
 
+  const onCLickProgress = (e) => {
+    //bar 너비
+    const progressBarWidth = e.currentTarget.clientWidth;
+    //가로 좌표
+    const offsetX = e.nativeEvent.offsetX;
+    //전체 음악의 시간 초단위
+    const duration = audio.current.duration;
+    audio.current.currentTime = (offsetX/progressBarWidth) * duration
+  }
+
+
   return (
-    <div className="progress-area">
+    <div className="progress-area" onMouseDown={onCLickProgress}>
       <div className="progress-bar" ref={progressBar}>
         <audio
           autoPlay
+          onEnded={onEnded}
           ref={audio}
-          src={music1}
+          src={playList[currentIndex].src}
           onPlay ={onPlay}
           onPause={onPause}
           onTimeUpdate = {ontimeUpdate}
