@@ -57,16 +57,25 @@ import music5 from '../music/music-5.mp3';
 
 
   //action 정의
+  const repeatMode = ['ONE', 'ALL' , 'SHUFFLE']
   const PLAY_MUSIC = "musicPlayer/PLAY_MUSIC";
   const STOP_MUSIC = "musicPlayer/STOP_MUSIC";
   const NEXT_MUSIC = "musicPlayer/NEXT_MUSIC";
   const PREV_MUSIC = "musicPlayer/PREV_MUSIC";
+  const SET_REPEAT = "musicPlayer/SET_REPEAT";
 
   //action 생성자
   export const playMusic = () => ({type: PLAY_MUSIC})
   export const stopyMusic = () => ({type: STOP_MUSIC})
   export const nextMusic = () => ({type: NEXT_MUSIC})
   export const prevMusic = () => ({type: PREV_MUSIC})
+  export const setReapeat = () => ({type: SET_REPEAT})
+
+  //arr : 노래의 수 , excludeNum : 제외할 인덱스
+  const getRendomNum  = (arr, excludeNum) =>  {
+    const randeomNumber = Math.floor(Math.random()*arr.length);
+    return arr[randeomNumber] === excludeNum? getRendomNum(arr, excludeNum) : arr[randeomNumber]
+  }
 
   //reducer 생성
   export default function musicPlayerReducer(state = initialState, action) {
@@ -82,19 +91,26 @@ import music5 from '../music/music-5.mp3';
             playing : false
         }
         case NEXT_MUSIC :
-          const nextIndex = (state.currentIndex + 1) % state.playList.length
+          const nextIndex = state.repeat === 'SHUFFLE' ? getRendomNum(Array.from(Array(playList.length).keys()), state.currentIndex)
+          : (state.currentIndex + 1) % state.playList.length
           return {
             ...state,
             currentIndex:nextIndex,
             currentMusicId : state.playList[nextIndex].id
           }
-
         case PREV_MUSIC :
-          const prevIndex =( state.currentIndex-1 + state.playList.length)%state.playList.length;
+          const prevIndex = state.repeat === 'SHUFFLE' ? getRendomNum(Array.from(Array(playList.length).keys()), state.currentIndex)
+          : (state.currentIndex + 1) % state.playList.length
+          ( state.currentIndex-1 + state.playList.length)%state.playList.length;
           return {
             ...state,
             currentIndex:prevIndex,
             currentMusicId : state.playList[prevIndex].id
+          }
+        case SET_REPEAT : 
+          return {
+            ...state,
+            repeat : repeatMode[(repeatMode.indexOf(state.repeat) + 1)%repeatMode.length]
           }
         default : return state
     }
