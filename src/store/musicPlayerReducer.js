@@ -63,6 +63,7 @@ import music5 from '../music/music-5.mp3';
   const NEXT_MUSIC = "musicPlayer/NEXT_MUSIC";
   const PREV_MUSIC = "musicPlayer/PREV_MUSIC";
   const SET_REPEAT = "musicPlayer/SET_REPEAT";
+  const SET_CURRENT_INDEX = "musicPlayer/SET_CURRENT_INDEX";
 
   //action 생성자
   export const playMusic = () => ({type: PLAY_MUSIC})
@@ -70,6 +71,7 @@ import music5 from '../music/music-5.mp3';
   export const nextMusic = () => ({type: NEXT_MUSIC})
   export const prevMusic = () => ({type: PREV_MUSIC})
   export const setReapeat = () => ({type: SET_REPEAT})
+  export const setCurrentIndex = (index) => ({type: SET_CURRENT_INDEX, index})
 
   //arr : 노래의 수 , excludeNum : 제외할 인덱스
   const getRendomNum  = (arr, excludeNum) =>  {
@@ -81,15 +83,21 @@ import music5 from '../music/music-5.mp3';
   export default function musicPlayerReducer(state = initialState, action) {
     switch(action.type) {
         case PLAY_MUSIC : 
-        return {
-            ...state,
-            playing : true
-        }
+          return {
+              ...state,
+              playing : true
+          }
         case STOP_MUSIC : 
-        return {
+          return {
+              ...state,
+              playing : false
+          }
+        case SET_CURRENT_INDEX :
+          return {
             ...state,
-            playing : false
-        }
+            currentIndex: action.index,
+            currentMusicId:state.playList[action.index].id
+          }
         case NEXT_MUSIC :
           const nextIndex = state.repeat === 'SHUFFLE' ? getRendomNum(Array.from(Array(playList.length).keys()), state.currentIndex)
           : (state.currentIndex + 1) % state.playList.length

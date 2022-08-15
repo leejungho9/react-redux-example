@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import "./ProgressArea.scss";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { nextMusic, playMusic, stopyMusic } from "../../store/musicPlayerReducer";
@@ -7,7 +7,7 @@ function ProgressArea(props, ref) {
 
   const audio = useRef();
   const dispatch = useDispatch();
-  const {playList,currentIndex } = useSelector(state=>({playList:state.playList, currentIndex:state.currentIndex}),shallowEqual);
+  const {playList,currentIndex, repeat } = useSelector(state=>({playList:state.playList, currentIndex:state.currentIndex, repeat:state.repeat}),shallowEqual);
   const progressBar = useRef();
 
   const [currentTime , setcurrentTime] = useState("00:00");
@@ -23,6 +23,9 @@ function ProgressArea(props, ref) {
     },
     changeVolume:(volume) => {
       audio.current.volume = volume
+    },
+    resetDuration:() => {
+      audio.current.currentTime= 0;
     }
   }))
 
@@ -34,9 +37,14 @@ function ProgressArea(props, ref) {
     dispatch(stopyMusic())
   }
 
-  const onEnded = () => {
-    dispatch(nextMusic())  
-  }
+  const onEnded = useCallback(() => {
+    if(repeat ==='ONE') {
+      audio.current.currentTime = 0;
+      audio.current.play();
+    }else {
+      dispatch(nextMusic())  
+    }
+  },[repeat])
 
   const getTime = (time) => {
     const minute = `0${parseInt(time/60,10)}`

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import RepeatOneIcon from "@mui/icons-material/RepeatOne";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -23,8 +23,7 @@ const RepeatButton =({repeat, ...props}) => {
   }
 }
 const Controls = ({
-  showMusicList,
-  setShowMusicList,
+  setshowPlayList,
   resetDuration,
   play,
   pause,
@@ -44,21 +43,35 @@ const Controls = ({
   const onChangeVolume =  (e) => {
     changeVolume(e.target.value)
   }
-  const onClickPrevios = () => {
-    dispatch(prevMusic())
-  }
-  const onClickNext = () => {
-    dispatch(nextMusic())
-  }
+
+  const onClickPrevios = useCallback(() => {
+    if(repeat === 'ONE'){
+      resetDuration();
+    } else {
+    dispatch(prevMusic());
+    }
+  },[repeat, resetDuration])
+
+  const onClickNext = useCallback(() => {
+    if(repeat === 'ONE') {
+      resetDuration();
+    }else {
+    dispatch(nextMusic());
+    }
+  },[repeat, resetDuration])
 
   const onclickRepeat = () => {
     dispatch(setReapeat())
+  }
+
+  const onClickShowPlayList = () => {
+    setshowPlayList(true)
   }
   return (
     <div className="control-area">
       <QueueMusic
         sx={{ fontSize: 30, cursor: "pointer" }}
-    
+        onClick={onClickShowPlayList}
       />
       <RepeatButton repeat={repeat} onClick={onclickRepeat}/>
       <SkipPrevious
