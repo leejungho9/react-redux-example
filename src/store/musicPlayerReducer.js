@@ -64,6 +64,7 @@ import music5 from '../music/music-5.mp3';
   const PREV_MUSIC = "musicPlayer/PREV_MUSIC";
   const SET_REPEAT = "musicPlayer/SET_REPEAT";
   const SET_CURRENT_INDEX = "musicPlayer/SET_CURRENT_INDEX";
+  const UPDATE_PLAY_LIST = "musicPlayer/UPDATE_PLAY_LIST";
 
   //action 생성자
   export const playMusic = () => ({type: PLAY_MUSIC})
@@ -72,6 +73,7 @@ import music5 from '../music/music-5.mp3';
   export const prevMusic = () => ({type: PREV_MUSIC})
   export const setReapeat = () => ({type: SET_REPEAT})
   export const setCurrentIndex = (index) => ({type: SET_CURRENT_INDEX, index})
+  export const updatePlayList = (newPlayList) => ({type: UPDATE_PLAY_LIST, newPlayList})
 
   //arr : 노래의 수 , excludeNum : 제외할 인덱스
   const getRendomNum  = (arr, excludeNum) =>  {
@@ -120,6 +122,13 @@ import music5 from '../music/music-5.mp3';
             ...state,
             repeat : repeatMode[(repeatMode.indexOf(state.repeat) + 1)%repeatMode.length]
           }
-        default : return state
+        case UPDATE_PLAY_LIST : 
+          const {newPlayList} = action
+          return {
+            ...state,
+            playList : newPlayList,
+            currentIndex : newPlayList.findIndex(music => music.id ===state.currentMusicId)
+          }
+        default : return state;
     }
   }
